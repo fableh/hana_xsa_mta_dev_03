@@ -1,0 +1,52 @@
+ID: hana_xsa_mta_dev_03
+_schema-version: '2.0'
+version: 0.0.1
+modules:
+  - name: myDB
+    type: hdb
+    path: myDB
+    requires:
+      - name: hdi_myDB
+  - name: web
+    type: html5
+    path: web
+    requires:
+      - name: hdi_myDB
+      - name: js_api
+        group: destinations
+        properties:
+          name: core-backend
+          url: '~{url}'
+          forwardAuthToken: true
+      - name: ui5-lib
+        properties:
+          ui5liburl: '~{url}'
+  - name: js
+    type: nodejs
+    path: js
+    provides:
+      - name: js_api
+        properties:
+          url: '${default-url}'
+    requires:
+      - name: uaa
+      - name: hdi_myDB
+      - name: myDB
+resources:
+  - name: hdi_myDB
+    parameters:
+      config:
+        schema: HANA2
+    properties:
+      hdi-container-name: '${service-name}'
+    type: com.sap.xs.hdi-container
+  - name: uaa
+    type: com.sap.xs.uaa-space
+    parameters:
+      config-path: './xs-security.json '
+  - name: ui5-lib
+    type: configuration
+    description: SAP UI5 Microservice
+    parameters:
+      provider-id: 'com.sap.ui5.dist.sapui5-dist-xsa.XSAC_UI5_FESV3:sapui5_fesv3'
+      version: '>=1.44.8'
